@@ -1,11 +1,73 @@
-require 'spec_helper'
+require "spec_helper"
+
+class Foo
+  include Redis::Helper
+
+  attr_reader :id, :number, :empty_key
+
+  def initialize(id, number)
+    @id = id
+    @number = number
+  end
+end
 
 describe Redis::Helper do
-  it 'has a version number' do
+  it "has a version number" do
     expect(Redis::Helper::VERSION).not_to be nil
   end
 
-  it 'does something useful' do
-    expect(false).to eq(true)
+  describe "helper methods" do
+    let(:foo) { Foo.new(42, 114514) }
+
+    describe "#redis" do
+      subject { foo.redis }
+      it("== Redis.current") { is_expected.to eq(Redis.current) }
+    end
+
+    describe "#attr_key" do
+      context "default unique_attr" do
+        subject { foo.attr_key(:bar) }
+        it { is_expected.to eq("Foo:42:bar") }
+      end
+
+      context "another unique_attr" do
+        subject { foo.attr_key(:bar, :number) }
+        it { is_expected.to eq("Foo:114514:bar") }
+      end
+
+      context "empty unique_attr" do
+        subject { -> { foo.attr_key(:bar, :empty_key) } }
+        it { is_expected.to raise_error(Redis::Helper::UnknownUniqueValue) }
+      end
+    end
+
+    describe "#ttl_to" do
+      subject { foo.ttl_to(to_time, from_time) }
+      let(:from_time) { Time.current }
+      let(:to_time) { from_time + offset }
+
+      context "default from_time" do
+        let(:offset) { 1000 }
+        subject { foo.ttl_to(to_time) }
+        it { is_expected.to be > 0 }
+        it { is_expected.to be <= offset }
+      end
+
+      context "future" do
+        let(:offset) { 1000 }
+        it { is_expected.to eq(offset) }
+      end
+
+      context "just now" do
+        let(:offset) { 0 }
+        it { is_expected.to eq(1) }
+      end
+
+      context "just now with unsigned_non_zero: false" do
+        let(:offset) { 0 }
+        subject { foo.ttl_to(to_time, from_time, unsigned_non_zero: false) }
+        it { is_expected.to eq(0) }
+      end
+    end
   end
 end

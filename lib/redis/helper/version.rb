@@ -1,5 +1,6 @@
-module Redis
+class Redis
   module Helper
-    VERSION = "0.1.0"
+    # バージョン
+    VERSION = "1.0.0".freeze
   end
 end

@@ -1,15 +1,15 @@
 # Redis::Helper
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/redis/helper`. To experiment with that code, run `bin/console` for an interactive prompt.
+Redisを扱うクラスで利用するモジュール
 
-TODO: Delete this and the text above, and describe your gem
+Redis::Objectsがmulti使えないとかアレっていう [@i2bskn](https://github.com/i2bskn) さん等の想いのカケラ。
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'redis-helper'
+gem "redis-helper"
 ```
 
 And then execute:
@@ -22,20 +22,30 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+class Foo < ActiveRecord::Base
+  include Redis::Helper
 
-## Development
+  def bar_count
+    # attr_key(:bar_count) => "Foo:<id>:bar_count"
+    redis.get(attr_key(:bar_count)).to_i
+  end
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+  def update_bar_count(count)
+    # ttl_to(self.end_at) => self.end_at - Time.current
+    redis.setex(attr_key(:bar_count), ttl_to(self.end_at), count)
+  end
+end
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+foo = Foo.find(id)
+foo.update_bar_count(10)
+foo.bar_count => 10
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/redis-helper.
-
-
-## License
-
-The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
+1. Fork it ( https://github.com/Narazaka/redis-helper/fork )
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
