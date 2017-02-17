@@ -12,8 +12,8 @@ class Foo
 end
 
 class Bar < Foo
-  redis_key :hoge, :piyo, unique_attr: :id
-  redis_key :hoge_by_number, unique_attr: :number
+  attr_key :hoge, :piyo, unique_attr: :id
+  attr_key :hoge_by_number, unique_attr: :number
 end
 
 describe Redis::Helper do
@@ -76,20 +76,20 @@ describe Redis::Helper do
     end
   end
 
-  describe ".redis_key" do
+  describe ".attr_key" do
     let(:bar) { Bar.new(42, 114514) }
     context "default unique_attr 1" do
-      subject { bar.hoge_redis_key }
+      subject { bar.hoge_key }
       it { is_expected.to eq("Bar:42:hoge") }
     end
 
     context "default unique_attr 2" do
-      subject { bar.piyo_redis_key }
+      subject { bar.piyo_key }
       it { is_expected.to eq("Bar:42:piyo") }
     end
 
     context "custom unique_attr" do
-      subject { bar.hoge_by_number_redis_key }
+      subject { bar.hoge_by_number_key }
       it { is_expected.to eq("Bar:114514:hoge_by_number") }
     end
   end

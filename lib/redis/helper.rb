@@ -9,15 +9,16 @@ require "redis/helper/version"
 # @example
 #   class Foo < ActiveRecord::Base
 #     include Redis::Helper
+#     attr_key :bar_count
 #
 #     def bar_count
-#       # attr_key(:bar_count) => "Foo:<id>:bar_count"
-#       redis.get(attr_key(:bar_count)).to_i
+#       # bar_count_key == attr_key(:bar_count) == "Foo:<id>:bar_count"
+#       redis.get(bar_count_key).to_i
 #     end
 #
 #     def update_bar_count(count)
 #       # ttl_to(self.end_at) => self.end_at - Time.current
-#       redis.setex(attr_key(:bar_count), ttl_to(self.end_at), count)
+#       redis.setex(bar_count_key, ttl_to(self.end_at), count)
 #     end
 #   end
 #
@@ -46,9 +47,10 @@ class Redis
         @redis ||= ::Redis.current
       end
 
-      def redis_key(*basenames, unique_attr: nil)
+      # 固定キーメソッドを作成する
+      def attr_key(*basenames, unique_attr: nil)
         basenames.each do |basename|
-          define_method(:"#{basename}_redis_key") do
+          define_method(:"#{basename}_key") do
             attr_key(basename, unique_attr)
           end
         end
