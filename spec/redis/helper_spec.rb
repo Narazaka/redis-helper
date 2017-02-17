@@ -12,8 +12,8 @@ class Foo
 end
 
 class Bar < Foo
-  attr_key :hoge, :piyo, unique_attr: :id
-  attr_key :hoge_by_number, unique_attr: :number
+  define_attr_keys :hoge, :piyo, unique_attr: :id
+  define_attr_keys :hoge_by_number, unique_attr: :number
 end
 
 describe Redis::Helper do

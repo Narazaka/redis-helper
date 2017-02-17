@@ -25,7 +25,7 @@ Or install it yourself as:
 ```ruby
 class Foo < ActiveRecord::Base
   include Redis::Helper
-  attr_key :bar_count
+  define_attr_keys :bar_count
 
   def bar_count
     # bar_count_key == attr_key(:bar_count) == "Foo:<id>:bar_count"

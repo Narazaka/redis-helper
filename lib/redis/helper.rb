@@ -9,7 +9,7 @@ require "redis/helper/version"
 # @example
 #   class Foo < ActiveRecord::Base
 #     include Redis::Helper
-#     attr_key :bar_count
+#     define_attr_keys :bar_count
 #
 #     def bar_count
 #       # bar_count_key == attr_key(:bar_count) == "Foo:<id>:bar_count"
@@ -50,7 +50,7 @@ class Redis
       # 固定キーメソッドを作成する
       # @param [Array<String|Symbol>] names キー名
       # @param [String|Symbol] unique_attr インスタンスの固有キーとして使用するメソッド名
-      def attr_key(*names, unique_attr: nil)
+      def define_attr_keys(*names, unique_attr: nil)
         names.each do |name|
           define_method(:"#{name}_key") do
             attr_key(name, unique_attr)
