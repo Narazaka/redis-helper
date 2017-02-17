@@ -48,10 +48,12 @@ class Redis
       end
 
       # 固定キーメソッドを作成する
-      def attr_key(*basenames, unique_attr: nil)
-        basenames.each do |basename|
-          define_method(:"#{basename}_key") do
-            attr_key(basename, unique_attr)
+      # @param [Array<String|Symbol>] names キー名
+      # @param [String|Symbol] unique_attr インスタンスの固有キーとして使用するメソッド名
+      def attr_key(*names, unique_attr: nil)
+        names.each do |name|
+          define_method(:"#{name}_key") do
+            attr_key(name, unique_attr)
           end
         end
       end
