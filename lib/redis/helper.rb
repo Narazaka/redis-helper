@@ -45,6 +45,14 @@ class Redis
       def redis
         @redis ||= ::Redis.current
       end
+
+      def redis_key(*basenames, unique_attr: nil)
+        basenames.each do |basename|
+          define_method(:"#{basename}_redis_key") do
+            attr_key(basename, unique_attr)
+          end
+        end
+      end
     end
 
     # instance固有のkeyとattr_nameからkeyを生成する

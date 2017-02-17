@@ -11,6 +11,11 @@ class Foo
   end
 end
 
+class Bar < Foo
+  redis_key :hoge, :piyo, unique_attr: :id
+  redis_key :hoge_by_number, unique_attr: :number
+end
+
 describe Redis::Helper do
   it "has a version number" do
     expect(Redis::Helper::VERSION).not_to be nil
@@ -68,6 +73,24 @@ describe Redis::Helper do
         subject { foo.ttl_to(to_time, from_time, unsigned_non_zero: false) }
         it { is_expected.to eq(0) }
       end
+    end
+  end
+
+  describe ".redis_key" do
+    let(:bar) { Bar.new(42, 114514) }
+    context "default unique_attr 1" do
+      subject { bar.hoge_redis_key }
+      it { is_expected.to eq("Bar:42:hoge") }
+    end
+
+    context "default unique_attr 2" do
+      subject { bar.piyo_redis_key }
+      it { is_expected.to eq("Bar:42:piyo") }
+    end
+
+    context "custom unique_attr" do
+      subject { bar.hoge_by_number_redis_key }
+      it { is_expected.to eq("Bar:114514:hoge_by_number") }
     end
   end
 end
