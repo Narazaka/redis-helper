@@ -25,15 +25,16 @@ Or install it yourself as:
 ```ruby
 class Foo < ActiveRecord::Base
   include Redis::Helper
+  define_attr_keys :bar_count
 
   def bar_count
-    # attr_key(:bar_count) => "Foo:<id>:bar_count"
-    redis.get(attr_key(:bar_count)).to_i
+    # bar_count_key == attr_key(:bar_count) == "Foo:<id>:bar_count"
+    redis.get(bar_count_key).to_i
   end
 
   def update_bar_count(count)
     # ttl_to(self.end_at) => self.end_at - Time.current
-    redis.setex(attr_key(:bar_count), ttl_to(self.end_at), count)
+    redis.setex(bar_count_key, ttl_to(self.end_at), count)
   end
 end
 
