@@ -1,5 +1,12 @@
 # Redis::Helper
 
+[![Gem](https://img.shields.io/gem/v/redis-helper.svg)](https://rubygems.org/gems/redis-helper)
+[![Gem](https://img.shields.io/gem/dtv/redis-helper.svg)](https://rubygems.org/gems/redis-helper)
+[![Gemnasium](https://gemnasium.com/Narazaka/redis-helper.svg)](https://gemnasium.com/Narazaka/redis-helper)
+[![Inch CI](http://inch-ci.org/github/Narazaka/redis-helper.svg)](http://inch-ci.org/github/Narazaka/redis-helper)
+[![Travis Build Status](https://travis-ci.org/Narazaka/redis-helper.svg)](https://travis-ci.org/Narazaka/redis-helper)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Narazaka/redis-helper?svg=true)](https://ci.appveyor.com/project/Narazaka/redis-helper)
+
 Redisを扱うクラスで利用するモジュール
 
 Redis::Objectsがmulti使えないとかアレっていう [@i2bskn](https://github.com/i2bskn) さん等の想いのカケラ。
