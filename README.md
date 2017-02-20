@@ -29,6 +29,8 @@ Or install it yourself as:
 
 ## Usage
 
+[API Documents](http://www.rubydoc.info/gems/redis-helper/)
+
 ```ruby
 class Foo < ActiveRecord::Base
   include Redis::Helper
