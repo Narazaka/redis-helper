@@ -28,6 +28,7 @@ require "redis/helper/version"
 #   foo.bar_count => 10
 #
 class Redis
+  # redisのヘルパー
   module Helper
     # 正しくない固有キー(固有キー値が空?)
     class UnknownUniqueValue < StandardError; end

@@ -1,9 +1,14 @@
 class Redis
   module Helper
+    # ロックの管理クラス
     class Lock
       # ロック取得のタイムアウト(sec)
       DEFAULT_TIMEOUT = 5
 
+      # @param [Redis] redis redisのインスタンス
+      # @param [String] lock_key ロックを保持するキー
+      # @param [Hash] options オプション
+      # @option options [Integer] timeout タイムアウト時間(sec)
       def initialize(redis, lock_key, options = {})
         @redis        = redis
         @lock_key     = lock_key
