@@ -17,6 +17,8 @@ class Bar < Foo
 end
 
 describe Redis::Helper do
+  let(:base_key) { "lock_example" }
+
   it "has a version number" do
     expect(Redis::Helper::VERSION).not_to be nil
   end
@@ -74,6 +76,13 @@ describe Redis::Helper do
         it { is_expected.to eq(0) }
       end
     end
+
+    describe "#lock" do
+      it "delegate to .lock method" do
+        expect(Foo).to receive(:lock).with(base_key)
+        foo.lock(base_key)
+      end
+    end
   end
 
   describe ".attr_key" do
@@ -91,6 +100,18 @@ describe Redis::Helper do
     context "custom unique_attr" do
       subject { bar.hoge_by_number_key }
       it { is_expected.to eq("Bar:114514:hoge_by_number") }
+    end
+  end
+
+  describe ".lock" do
+    let(:lock_key) {
+      [base_key, ::Redis::Helper::LOCK_POSTFIX].join(::Redis::Helper::REDIS_KEY_DELIMITER)
+    }
+
+    it "create Redis::Helper::Lock intance with lock_key and call #lock" do
+      expect(obj = double("Redis::Helper::Lock")).to receive(:lock)
+      expect(::Redis::Helper::Lock).to receive(:new).with(Foo.redis, lock_key).and_return(obj)
+      Foo.lock(base_key)
     end
   end
 end

@@ -2,6 +2,7 @@ require "redis"
 require "active_support"
 require "active_support/core_ext/object/blank"
 require "active_support/core_ext/numeric/time"
+require "redis/helper/lock"
 require "redis/helper/version"
 
 # Redisを扱うクラスで利用するモジュール
@@ -30,11 +31,14 @@ class Redis
   module Helper
     # 正しくない固有キー(固有キー値が空?)
     class UnknownUniqueValue < StandardError; end
+    class LockTimeout < StandardError; end
 
     # デフォルトの固有キー名
     DEFAULT_UNIQUE_ATTR_NAME = :id
     # redisキーの区切り文字
     REDIS_KEY_DELIMITER = ":".freeze
+    # ロックを取得に利用する接尾辞
+    LOCK_POSTFIX = "lock".freeze
 
     def self.included(klass)
       klass.extend ClassMethods
@@ -56,6 +60,14 @@ class Redis
             attr_key(name, unique_attr)
           end
         end
+      end
+
+      # 特定のkeyをbaseにしたロックをかけてブロック内の処理を実行
+      # @param [String] base_key ロックを取得するリソースのkey
+      # @yield ロック中に実行する処理のブロック
+      def lock(base_key, &block)
+        lock_key = [base_key, LOCK_POSTFIX].compact.join(REDIS_KEY_DELIMITER)
+        ::Redis::Helper::Lock.new(redis, lock_key).lock(&block)
       end
     end
 
@@ -99,6 +111,17 @@ class Redis
     # @return [Redis]
     def redis
       self.class.redis
+    end
+
+    # 特定のkeyをbaseにしたロックをかけてブロック内の処理を実行
+    # @example
+    #   lock(attr_key(:foo)) {
+    #     # some processing
+    #   }
+    # @param [String] base_key ロックを取得するリソースのkey
+    # @yield ロック中に実行する処理のブロック
+    def lock(base_key, &block)
+      self.class.lock(base_key, &block)
     end
   end
 end
