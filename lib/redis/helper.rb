@@ -52,6 +52,10 @@ class Redis
         @redis ||= ::Redis.current
       end
 
+      def redis=(conn)
+        @redis = conn
+      end
+
       # 固定キーメソッドを作成する
       # @param [Array<String|Symbol>] names キー名
       # @param [String|Symbol] unique_attr インスタンスの固有キーとして使用するメソッド名
@@ -70,26 +74,30 @@ class Redis
         lock_key = [base_key, LOCK_POSTFIX].compact.join(REDIS_KEY_DELIMITER)
         ::Redis::Helper::Lock.new(redis, lock_key).lock(&block)
       end
+
+      # インスタンス固有キーから#attr_key/#instance_keyが返すキーを生成する
+      # @param [String|Integer] unique_key インスタンス固有のキー
+      # @param [String|Symbol] attr_name attr_key生成時に利用するキー名
+      # @return [String]
+      def generate_key(unique_key, attr_name = nil)
+        [name, unique_key, attr_name].compact.join(REDIS_KEY_DELIMITER)
+      end
     end
 
     # instance固有のkeyとattr_nameからkeyを生成する
     # (instanceに複数のkeyを設定したい場合やkeyにattr_nameを含めたい場合に使用する)
-    # @param [String|Symbol] name キー名
+    # @param [String|Symbol] attr_name キー名
     # @param [String|Symbol] unique_attr インスタンスの固有キーとして使用するメソッド名
     # @return [String]
-    def attr_key(name, unique_attr = nil)
-      [instance_key(unique_attr), name].join(REDIS_KEY_DELIMITER)
+    def attr_key(attr_name, unique_attr = nil)
+      self.class.generate_key(unique_key(unique_attr), attr_name)
     end
 
     # instance固有のkeyを生成する ("<Class Name>:<unique key>")
     # @param [String|Symbol] unique_attr インスタンスの固有キーとして使用するメソッド名
     # @return [String]
     def instance_key(unique_attr = nil)
-      attr_name = unique_attr || DEFAULT_UNIQUE_ATTR_NAME
-      if (unique_key = self.public_send(attr_name)).blank?
-        raise UnknownUniqueValue, "unique keyとして指定された値(#{attr_name})が取得できません"
-      end
-      [self.class.name, unique_key].join(REDIS_KEY_DELIMITER)
+      self.class.generate_key(unique_key(unique_attr))
     end
 
     # 引数で指定した時間にexpireするためのttl値を生成
@@ -123,6 +131,16 @@ class Redis
     # @yield ロック中に実行する処理のブロック
     def lock(base_key, &block)
       self.class.lock(base_key, &block)
+    end
+
+    # インスタンス固有のキーを取得
+    # @param [String|Symbol] unique_attr インスタンスの固有キーとして使用するメソッド名
+    def unique_key(unique_attr = nil)
+      attr_name = unique_attr.presence || DEFAULT_UNIQUE_ATTR_NAME
+      if (unique_key = self.public_send(attr_name)).blank?
+        raise UnknownUniqueValue, "unique keyとして指定された値(#{attr_name})が取得できません"
+      end
+      unique_key
     end
   end
 end
