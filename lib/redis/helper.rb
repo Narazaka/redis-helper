@@ -52,6 +52,10 @@ class Redis
         @redis ||= ::Redis.current
       end
 
+      def redis=(conn)
+        @redis = conn
+      end
+
       # 固定キーメソッドを作成する
       # @param [Array<String|Symbol>] names キー名
       # @param [String|Symbol] unique_attr インスタンスの固有キーとして使用するメソッド名

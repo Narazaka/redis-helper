@@ -31,6 +31,15 @@ describe Redis::Helper do
       it("== Redis.current") { is_expected.to eq(Redis.current) }
     end
 
+    describe "#redis=" do
+      before { Foo.redis = double("redis") }
+      after { Foo.redis = nil }
+      subject { foo.redis }
+      it "custom redis connection" do
+        is_expected.not_to eq(Redis.current)
+      end
+    end
+
     describe "#attr_key" do
       context "default unique_attr" do
         subject { foo.attr_key(:bar) }
