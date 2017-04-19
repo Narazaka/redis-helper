@@ -57,6 +57,23 @@ describe Redis::Helper do
       end
     end
 
+    describe "#instance_key" do
+      context "default unique_attr" do
+        subject { foo.instance_key }
+        it { is_expected.to eq("Foo:42") }
+      end
+
+      context "another unique_attr" do
+        subject { foo.instance_key(:number) }
+        it { is_expected.to eq("Foo:114514") }
+      end
+
+      context "empty unique_attr" do
+        subject { -> { foo.instance_key(:empty_key) } }
+        it { is_expected.to raise_error(Redis::Helper::UnknownUniqueValue) }
+      end
+    end
+
     describe "#ttl_to" do
       subject { foo.ttl_to(to_time, from_time) }
       let(:from_time) { Time.current }
@@ -92,6 +109,16 @@ describe Redis::Helper do
         foo.lock(base_key)
       end
     end
+
+    describe "#unique_key" do
+      it "unique_key with default unique attr name" do
+        expect(foo.unique_key).to eq(42)
+      end
+
+      it "unique_key with specified unique attr name" do
+        expect(foo.unique_key(:number)).to eq(114514)
+      end
+    end
   end
 
   describe ".attr_key" do
@@ -121,6 +148,16 @@ describe Redis::Helper do
       expect(obj = double("Redis::Helper::Lock")).to receive(:lock)
       expect(::Redis::Helper::Lock).to receive(:new).with(Foo.redis, lock_key).and_return(obj)
       Foo.lock(base_key)
+    end
+  end
+
+  describe ".generate_key" do
+    it "generate instance_key" do
+      expect(Foo.generate_key(1)).to eq("Foo:1")
+    end
+
+    it "generate attr_key" do
+      expect(Foo.generate_key(1, :bar)).to eq("Foo:1:bar")
     end
   end
 end
